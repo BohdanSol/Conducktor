@@ -120,13 +120,48 @@ pub fn build_usage_dto(latest: &LatestUsage) -> UsageDto {
     }
 }
 
-/// Tray-bar title, e.g. "S 5% (in 5h) · W 2% (in 3d 20h) · F 1%".
-pub fn build_tray_title(dto: &UsageDto, settings: &Settings) -> String {
+/// The visual role of a [`TraySegment`] — lets the tray-rendering code
+/// (native `NSAttributedString` on macOS) apply a distinct font/color
+/// per role without re-deriving the text layout logic.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum TraySegmentKind {
+    /// "S " / "W " / "F " — bold, smaller, gray.
+    Label,
+    /// The percentage itself, e.g. "48%" — normal weight/size/color,
+    /// the one thing meant to pop visually.
+    Value,
+    /// " (in 5h)" or the trailing " ⚠" — smaller, gray.
+    Timing,
+    /// " · " between meters — smaller, gray.
+    Separator,
+}
+
+#[derive(Debug, Clone)]
+pub struct TraySegment {
+    pub text: String,
+    pub kind: TraySegmentKind,
+}
+
+impl TraySegment {
+    fn new(text: impl Into<String>, kind: TraySegmentKind) -> Self {
+        TraySegment { text: text.into(), kind }
+    }
+}
+
+/// Structured version of the tray-bar content, e.g.
+/// `[S][48%][ (in 5h)][ · ][W][7%][ (in 1d 11h)][ · ][F][5%]`.
+/// `build_tray_title` below just concatenates these back into a plain
+/// string, so the two never drift.
+pub fn build_tray_segments(dto: &UsageDto, settings: &Settings) -> Vec<TraySegment> {
     match dto.status.as_str() {
-        "not_logged_in" => return "Claude: login required".to_string(),
-        "unauthorized" => return "Claude: login rejected".to_string(),
+        "not_logged_in" => {
+            return vec![TraySegment::new("Claude: login required", TraySegmentKind::Value)]
+        }
+        "unauthorized" => {
+            return vec![TraySegment::new("Claude: login rejected", TraySegmentKind::Value)]
+        }
         "no_data_yet" if dto.session.is_none() && dto.weekly.is_none() && dto.weekly_fable.is_none() => {
-            return "Claude: …".to_string()
+            return vec![TraySegment::new("Claude: …", TraySegmentKind::Value)]
         }
         _ => {}
     }
@@ -134,37 +169,59 @@ pub fn build_tray_title(dto: &UsageDto, settings: &Settings) -> String {
     let now = SystemTime::now();
     let short_reset = |m: &MeterDto| m.resets_at_epoch_secs.map(|r| format_countdown(r, now, false));
 
-    let mut segments = Vec::new();
+    let mut segments: Vec<TraySegment> = Vec::new();
 
     if settings.show_session {
         if let Some(m) = &dto.session {
-            segments.push(match short_reset(m) {
-                Some(reset) => format!("S {} (in {})", m.pct_label, reset),
-                None => format!("S {}", m.pct_label),
-            });
+            if !segments.is_empty() {
+                segments.push(TraySegment::new(" · ", TraySegmentKind::Separator));
+            }
+            segments.push(TraySegment::new("S ", TraySegmentKind::Label));
+            segments.push(TraySegment::new(m.pct_label.clone(), TraySegmentKind::Value));
+            if let Some(reset) = short_reset(m) {
+                segments.push(TraySegment::new(format!(" (in {reset})"), TraySegmentKind::Timing));
+            }
         }
     }
     if settings.show_weekly {
         if let Some(m) = &dto.weekly {
-            segments.push(match short_reset(m) {
-                Some(reset) => format!("W {} (in {})", m.pct_label, reset),
-                None => format!("W {}", m.pct_label),
-            });
+            if !segments.is_empty() {
+                segments.push(TraySegment::new(" · ", TraySegmentKind::Separator));
+            }
+            segments.push(TraySegment::new("W ", TraySegmentKind::Label));
+            segments.push(TraySegment::new(m.pct_label.clone(), TraySegmentKind::Value));
+            if let Some(reset) = short_reset(m) {
+                segments.push(TraySegment::new(format!(" (in {reset})"), TraySegmentKind::Timing));
+            }
         }
     }
     if settings.show_fable {
         if let Some(m) = &dto.weekly_fable {
-            segments.push(format!("F {}", m.pct_label));
+            if !segments.is_empty() {
+                segments.push(TraySegment::new(" · ", TraySegmentKind::Separator));
+            }
+            segments.push(TraySegment::new("F ", TraySegmentKind::Label));
+            segments.push(TraySegment::new(m.pct_label.clone(), TraySegmentKind::Value));
         }
     }
 
     if segments.is_empty() {
-        return "Claude: …".to_string();
+        return vec![TraySegment::new("Claude: …", TraySegmentKind::Value)];
     }
 
-    let mut title = segments.join(" · ");
     if dto.status == "stale" {
-        title.push_str(" ⚠");
+        segments.push(TraySegment::new(" ⚠", TraySegmentKind::Timing));
     }
-    title
+
+    segments
+}
+
+/// Plain-text fallback of [`build_tray_segments`] — used as the
+/// baseline `NSStatusItem.title` (accessibility/VoiceOver text, and the
+/// only rendering path on non-macOS, though this app is macOS-only).
+pub fn build_tray_title(dto: &UsageDto, settings: &Settings) -> String {
+    build_tray_segments(dto, settings)
+        .iter()
+        .map(|s| s.text.as_str())
+        .collect()
 }

@@ -26,3 +26,14 @@ reqwest = { version = "0.12", default-features = false, features = ["json", "rus
 tokio = { version = "1", features = ["full"] }
 chrono = { version = "0.4", features = ["clock"] }
 
+# Native rich-text tray title (bold/small/gray "S"/"W"/"F" + de-emphasized
+# timing) — NSStatusItem only exposes a plain-string title through Tauri's
+# public API, so this reaches the underlying NSStatusBarButton directly to
+# set an NSAttributedString. Versions match what `tray-icon` (a transitive
+# dependency of `tauri`) already pulls in, so this unifies with the existing
+# resolved versions instead of duplicating the crates.
+[target.'cfg(target_os = "macos")'.dependencies]
+objc2 = "0.6"
+objc2-foundation = { version = "0.3", features = ["NSObject", "NSString", "NSDictionary", "NSAttributedString", "alloc"] }
+objc2-app-kit = { version = "0.3", features = ["NSStatusItem", "NSStatusBarButton", "NSFont", "NSColor", "NSAttributedString"] }
+
