@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="stylesheet" href="/src/styles.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Conducktor Settings</title>
+  <script type="module" src="/src/main.ts" defer></script>
+</head>
+
+<body>
+  <main class="container">
+    <h1>Claude Code Usage</h1>
+
+    <section class="status">
+      <p id="status-message">Loading…</p>
+      <p id="last-updated" class="muted"></p>
+      <ul id="meter-list"></ul>
+    </section>
+
+    <section class="settings">
+      <h2>Show in menu bar</h2>
+      <label class="row">
+        <input type="checkbox" id="show-session" />
+        Session (5-hour)
+      </label>
+      <label class="row">
+        <input type="checkbox" id="show-weekly" />
+        Weekly
+      </label>
+      <label class="row">
+        <input type="checkbox" id="show-fable" />
+        Weekly (Fable 5)
+        <span id="fable-hint" class="muted hint"></span>
+      </label>
+
+      <h2>Refresh interval</h2>
+      <select id="refresh-interval">
+        <option value="30">30 seconds</option>
+        <option value="60">1 minute</option>
+        <option value="120">2 minutes</option>
+        <option value="300">5 minutes</option>
+      </select>
+      <p class="muted hint">
+        Polling faster than 30s tends to get rate-limited by the endpoint.
+      </p>
+    </section>
+
+    <div class="actions">
+      <button id="refresh-now">Refresh now</button>
+    </div>
+  </main>
+</body>
+
+</html>

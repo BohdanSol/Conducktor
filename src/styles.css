@@ -1,0 +1,144 @@
+:root {
+  font-family: -apple-system, BlinkMacSystemFont, Inter, Avenir, Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+  font-weight: 400;
+
+  color: #0f0f0f;
+  background-color: #f6f6f6;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+.container {
+  margin: 0;
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+h1 {
+  font-size: 16px;
+  margin: 0;
+}
+
+h2 {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #666;
+  margin: 0 0 6px 0;
+}
+
+.muted {
+  color: #777;
+  font-size: 12px;
+  margin: 2px 0;
+}
+
+.hint {
+  margin-left: 6px;
+}
+
+.status {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: #fff;
+}
+
+#status-message {
+  margin: 0 0 4px 0;
+  font-weight: 500;
+}
+
+#status-message.error {
+  color: #b3261e;
+}
+
+#meter-list {
+  list-style: none;
+  margin: 6px 0 0 0;
+  padding: 0;
+  font-size: 13px;
+}
+
+#meter-list li {
+  padding: 2px 0;
+}
+
+.settings label.row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: flex-start;
+  padding: 4px 0;
+  font-size: 13px;
+}
+
+select {
+  width: 100%;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 13px;
+  background: #fff;
+  color: #0f0f0f;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.5em 1em;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  color: #0f0f0f;
+  background-color: #ffffff;
+  border: 1px solid #ccc;
+  cursor: pointer;
+}
+
+button:hover {
+  border-color: #396cd8;
+}
+button:active {
+  background-color: #e8e8e8;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color: #f6f6f6;
+    background-color: #2f2f2f;
+  }
+
+  .status {
+    background: #262626;
+    border-color: #444;
+  }
+
+  select,
+  button {
+    color: #ffffff;
+    background-color: #3a3a3a;
+    border-color: #555;
+  }
+}
