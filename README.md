@@ -16,7 +16,6 @@ which meters to show and how often to poll.
 ## Download
 
 - [**Conducktor_0.1.0_aarch64.dmg**](release/Conducktor_0.1.0_aarch64.dmg) — installer (drag to Applications)
-- [**Conducktor.app.zip**](release/Conducktor.app.zip) — zipped app bundle
 
 Both are unsigned Apple Silicon (arm64) builds — see [Build](#build) for
 the Gatekeeper workaround on first launch.
